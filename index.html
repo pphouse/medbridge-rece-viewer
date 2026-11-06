@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MedBridge 医事ベンチ</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <span class="brand">MedBridge 医事ベンチ</span>
+  <nav><a href="index.html">概要</a><a href="run.html">録画ビューア</a><a href="article.html">記事</a></nav>
+  <span class="sp"></span>
+  <span class="muted" id="gen"></span>
+</header>
+<main>
+  <h1>レセコン（医事会計）computer-use ベンチマーク</h1>
+  <p class="lead">架空の病院（一般病床 180 床・外来 150 名）の電子カルテとレセコンを並べた医事課端末で、VLM がスクリーンショットだけを見てマウスとキーボードで医事業務（照会・入力・電子カルテからの転記・レセプト点検）をこなせるかを測りました。点数は令和8年度の公式マスタで計算しています。ローカルモデルは DGX Spark（GB10）上の llama.cpp、Claude はクラウド API（参考）です。</p>
+
+  <h2>モデル別サマリ</h2>
+  <div class="cards" id="cards"></div>
+
+  <h2>エージェントタスク（end-to-end）</h2>
+  <p class="lead">各タスクで両システムを初期化し、モデルにスクリーンショットだけを渡して操作させます。照会タスクは答えの文字列で、入力・転記・点検タスクはタスク後のレセコンの状態（正解の診療行為と一致するか、対象外の変更がないか）で判定します。セルをクリックすると録画を再生できます。</p>
+  <div class="tbl-wrap"><table id="cat"></table></div>
+  <h3>タスク × モデル</h3>
+  <div class="tbl-wrap"><table id="matrix"></table></div>
+
+</main>
+<script>
+const pct = (a, b) => (b ? (100 * a / b).toFixed(1) + "%" : "–");
+const fmt = (x, d = 1) => (x === null || x === undefined || Number.isNaN(x) ? "–" : Number(x).toFixed(d));
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+fetch("data/summary.json").then((r) => r.json()).then((S) => {
+  document.getElementById("gen").textContent = "更新: " + S.generatedAt.slice(0, 16).replace("T", " ");
+  const models = S.models.filter((m) => S.agent[m.id]);
+
+  // カード
+  document.getElementById("cards").innerHTML = models.map((m) => {
+    const runs = Object.values(S.agent[m.id] || {});
+    const pass = runs.filter((r) => r.pass).length;
+        const lat = runs.length ? runs.reduce((a, r) => a + r.meanLatency, 0) / runs.length : null;
+    return `<div class="card">
+      <div class="name">${esc(m.label)}</div>
+      <div class="note">${esc(m.note || "")}</div>
+      <div class="big">${runs.length ? pct(pass, runs.length) : "–"}</div>
+      <div class="muted" style="font-size:12px">エージェントタスク成功率（${pass}/${runs.length}）</div>
+      <div class="kv">
+        <span>1 手あたりの推論時間</span><span>${lat !== null ? fmt(lat) + " 秒" : "–"}</span>
+      </div>
+    </div>`;
+  }).join("");
+
+  // カテゴリ別
+  const cats = [...new Set(S.tasks.map((t) => t.category))];
+  const agentModels = models.filter((m) => S.agent[m.id]);
+  let h = `<tr><th>カテゴリ</th><th class="num">タスク数</th>${agentModels.map((m) => `<th class="num">${esc(m.label)}</th>`).join("")}</tr>`;
+  for (const c of [...cats, "全体"]) {
+    const ts = S.tasks.filter((t) => c === "全体" || t.category === c);
+    h += `<tr><td>${c === "全体" ? "<b>全体</b>" : esc(c)}</td><td class="num">${ts.length}</td>${agentModels.map((m) => {
+      const rs = ts.map((t) => S.agent[m.id][t.id]).filter(Boolean);
+      const p = rs.filter((r) => r.pass).length;
+      return `<td class="num">${rs.length ? `${pct(p, rs.length)} <span class="muted">(${p}/${rs.length})</span>` : "–"}</td>`;
+    }).join("")}</tr>`;
+  }
+  document.getElementById("cat").innerHTML = h;
+
+  // マトリクス
+  let mh = `<tr><th>ID</th><th>カテゴリ</th><th>タスク</th>${agentModels.map((m) => `<th>${esc(m.label)}</th>`).join("")}</tr>`;
+  for (const t of S.tasks) {
+    mh += `<tr><td class="mono">${t.id}</td><td><span class="chip cat">${esc(t.category)}</span></td><td style="min-width:360px">${esc(t.instruction)}</td>${agentModels.map((m) => {
+      const r = S.agent[m.id][t.id];
+      if (!r) return `<td><span class="chip none">未実行</span></td>`;
+      return `<td><a href="run.html?m=${m.id}&t=${t.id}"><span class="chip ${r.pass ? "pass" : "fail"}">${r.pass ? "成功" : "失敗"}</span></a><div class="muted" style="font-size:12px">${r.steps} 手 / ${fmt(r.duration, 0)} 秒</div></td>`;
+    }).join("")}</tr>`;
+  }
+  document.getElementById("matrix").innerHTML = mh;
+
+});
+</script>
+</body>
+</html>

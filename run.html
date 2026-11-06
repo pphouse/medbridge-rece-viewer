@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>録画ビューア — MedBridge 医事ベンチ</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .sub { position: absolute; left: 4%; right: 4%; bottom: 56px; background: rgba(0,0,0,.72); color: #fff; padding: 8px 14px; border-radius: 6px; font-size: 15px; line-height: 1.55; white-space: pre-wrap; max-height: 40%; overflow: hidden; pointer-events: none; }
+  .sub .a { font-family: var(--mono); color: #ffd27a; font-size: 13px; }
+  #speeds button { padding: 2px 8px; font-size: 12px; }
+</style>
+</head>
+<body>
+<header class="top">
+  <span class="brand">MedBridge 医事ベンチ</span>
+  <nav><a href="index.html">概要</a><a href="run.html">録画ビューア</a><a href="article.html">記事</a></nav>
+  <span class="sp"></span>
+  <label class="muted">モデル <select id="selM"></select></label>
+  <label class="muted">タスク <select id="selT"></select></label>
+</header>
+<main>
+  <div class="row" style="margin-bottom:10px">
+    <h1 id="title" style="margin:0"></h1>
+    <span id="verdict"></span>
+    <span class="sp" style="flex:1"></span>
+    <span class="muted">再生速度</span>
+    <span id="speeds" class="row" style="gap:4px"></span>
+    <label class="muted" style="margin-left:8px"><input type="checkbox" id="subs"> 思考を字幕で表示</label>
+    <button id="modeVideo" class="on" style="margin-left:8px">録画</button>
+    <button id="modeStep">ステップ画像</button>
+  </div>
+  <p id="instr" class="lead" style="max-width:none"></p>
+  <div class="run">
+    <div>
+      <div class="stage" id="stage">
+        <video id="video" controls playsinline preload="metadata"></video>
+        <img id="stepImg" alt="" hidden>
+        <svg id="overlay" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid meet"></svg>
+        <div id="sub" class="sub" hidden></div>
+      </div>
+      <div class="muted" style="font-size:12px;margin-top:4px">操作: Space 再生／停止・← → 5 秒戻る／進む・↑ ↓ 前後のステップ・[ ] 速度変更</div>
+      <div class="caption" id="caption"></div>
+      <h3>判定</h3>
+      <div class="tbl-wrap"><table class="kvtable" id="result"></table></div>
+      <h3>サーバの書き込みログ</h3>
+      <pre id="audit"></pre>
+    </div>
+    <div class="side">
+      <div class="steps" id="steps"></div>
+    </div>
+  </div>
+</main>
+<script>
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const q = new URLSearchParams(location.search);
+const video = document.getElementById("video");
+const img = document.getElementById("stepImg");
+const svg = document.getElementById("overlay");
+let T = null, cur = -1, mode = "video";
+const SPEEDS = [0.5, 1, 2, 4, 8, 16];
+const store = { get: (k, d) => { try { return localStorage.getItem(k) ?? d; } catch { return d; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
+let speed = Number(store.get("mb-speed", "4"));
+const subs = document.getElementById("subs");
+const sub = document.getElementById("sub");
+subs.checked = store.get("mb-subs", "1") === "1";
+function setSpeed(v) {
+  speed = v;
+  video.playbackRate = v;
+  store.set("mb-speed", String(v));
+  document.getElementById("speeds").innerHTML = SPEEDS.map((x) => `<button class="${x === v ? "on" : ""}" data-s="${x}">×${x}</button>`).join("");
+  document.querySelectorAll("#speeds button").forEach((b) => (b.onclick = () => setSpeed(Number(b.dataset.s))));
+}
+video.addEventListener("loadedmetadata", () => (video.playbackRate = speed));
+subs.onchange = () => { store.set("mb-subs", subs.checked ? "1" : "0"); renderSub(); };
+function renderSub() {
+  const s = T && T.steps[cur];
+  sub.hidden = !subs.checked || !s || mode !== "video";
+  if (!sub.hidden) sub.innerHTML = `<div class="a">ステップ ${s.n}　${esc(actText(s.action))}${s.error ? "　⚠ " + esc(s.error) : ""}</div>${esc(s.thought || "（思考の出力なし）")}`;
+}
+
+function actText(a) {
+  switch (a.action) {
+    case "click": return `click(${a.x}, ${a.y})`;
+    case "double_click": return `double_click(${a.x}, ${a.y})`;
+    case "type": return `type("${a.text}")`;
+    case "key": return `key(${a.key})`;
+    case "scroll": return `scroll(${a.direction})`;
+    case "answer": return `answer("${a.text}")`;
+    default: return a.action + "()";
+  }
+}
+
+function marker(a) {
+  if (a.x === undefined || a.x === null) return "";
+  return `<circle cx="${a.x}" cy="${a.y}" r="26" fill="none" stroke="#ff3d00" stroke-width="5"/><circle cx="${a.x}" cy="${a.y}" r="5" fill="#ff3d00"/>`;
+}
+
+function select(i, seek) {
+  cur = i;
+  document.querySelectorAll(".step").forEach((el, k) => el.classList.toggle("cur", k === i));
+  const s = T.steps[i];
+  if (!s) return;
+  renderSub();
+  const el = document.querySelectorAll(".step")[i];
+  el && el.scrollIntoView({ block: "nearest" });
+  document.getElementById("caption").innerHTML = `<b>ステップ ${s.n}</b>　<span class="mono">${esc(actText(s.action))}</span>　<span class="muted">推論 ${s.latency.toFixed(1)} 秒</span>${s.error ? `<div style="color:var(--fail)">${esc(s.error)}</div>` : ""}\n${esc(s.thought || "（思考の出力なし）")}`;
+  if (mode === "step") {
+    img.src = `runs/${T.model}/${T.task.id}/${s.screenshot.replace(/\.png$/, ".webp")}`;
+    svg.innerHTML = marker(s.action);
+  } else {
+    svg.innerHTML = "";
+    if (seek) { video.currentTime = Math.max(0, s.t); }
+  }
+}
+
+function setMode(m) {
+  mode = m;
+  document.getElementById("modeVideo").classList.toggle("on", m === "video");
+  document.getElementById("modeStep").classList.toggle("on", m === "step");
+  video.hidden = m !== "video";
+  img.hidden = m !== "step";
+  if (m === "step") video.pause();
+  renderSub();
+  select(Math.max(0, cur), false);
+}
+document.getElementById("modeVideo").onclick = () => setMode("video");
+document.getElementById("modeStep").onclick = () => setMode("step");
+
+video.addEventListener("timeupdate", () => {
+  if (!T || mode !== "video") return;
+  let i = 0;
+  T.steps.forEach((s, k) => { if (s.t <= video.currentTime + 0.05) i = k; });
+  if (i !== cur) select(i, false);
+});
+
+document.addEventListener("keydown", (e) => {
+  if (!T || e.target.tagName === "SELECT" || e.target.tagName === "INPUT") return;
+  if (e.key === " ") { video.paused ? video.play() : video.pause(); e.preventDefault(); }
+  if (e.key === "ArrowLeft") { video.currentTime = Math.max(0, video.currentTime - 5); e.preventDefault(); }
+  if (e.key === "ArrowRight") { video.currentTime = video.currentTime + 5; e.preventDefault(); }
+  if (e.key === "]") setSpeed(SPEEDS[Math.min(SPEEDS.length - 1, SPEEDS.indexOf(speed) + 1)] ?? speed);
+  if (e.key === "[") setSpeed(SPEEDS[Math.max(0, SPEEDS.indexOf(speed) - 1)] ?? speed);
+  if (e.key === "ArrowDown" || e.key === "j") { select(Math.min(T.steps.length - 1, cur + 1), true); e.preventDefault(); }
+  if (e.key === "ArrowUp" || e.key === "k") { select(Math.max(0, cur - 1), true); e.preventDefault(); }
+});
+
+fetch("data/summary.json").then((r) => r.json()).then((S) => {
+  const models = S.models.filter((m) => S.agent[m.id]);
+  const m = q.get("m") || models[0]?.id;
+  const t = q.get("t") || S.tasks[0].id;
+  const selM = document.getElementById("selM"), selT = document.getElementById("selT");
+  selM.innerHTML = models.map((x) => `<option value="${x.id}" ${x.id === m ? "selected" : ""}>${esc(x.label)}</option>`).join("");
+  selT.innerHTML = S.tasks.map((x) => {
+    const r = S.agent[m]?.[x.id];
+    return `<option value="${x.id}" ${x.id === t ? "selected" : ""}>${x.id} ${r ? (r.pass ? "✓" : "✗") : "－"} ${esc(x.instruction.slice(0, 28))}…</option>`;
+  }).join("");
+  const go = () => (location.search = `?m=${selM.value}&t=${selT.value}`);
+  selM.onchange = go; selT.onchange = go;
+  if (!S.agent[m]?.[t]) { document.getElementById("title").textContent = "このモデルではこのタスクは未実行です"; return; }
+  return fetch(`runs/${m}/${t}/trajectory.json`).then((r) => r.json()).then((tr) => {
+    T = tr;
+    document.title = `${tr.task.id} ${tr.modelLabel} — 録画ビューア`;
+    document.getElementById("title").textContent = `${tr.task.id}　${tr.modelLabel}`;
+    document.getElementById("verdict").innerHTML = `<span class="chip ${tr.pass ? "pass" : "fail"}">${tr.pass ? "成功" : "失敗"}</span> <span class="chip cat">${esc(tr.task.category)}</span> <span class="muted">${tr.steps.length} 手 / ${tr.durationSec.toFixed(0)} 秒</span>`;
+    document.getElementById("instr").textContent = tr.task.instruction;
+    video.src = `runs/${m}/${t}/video.mp4`;
+    document.getElementById("steps").innerHTML = tr.steps.map((s, i) => `<div class="step" data-i="${i}">
+      <div class="h"><span class="n">${s.n}</span><span class="act">${esc(actText(s.action))}</span><span class="t">${s.t.toFixed(1)}s</span></div>
+      ${s.thought ? `<div class="th">${esc(s.thought.length > 220 ? s.thought.slice(0, 220) + "…" : s.thought)}</div>` : ""}
+      ${s.error ? `<div class="err">${esc(s.error)}</div>` : ""}
+    </div>`).join("");
+    document.querySelectorAll(".step").forEach((el) => (el.onclick = () => select(Number(el.dataset.i), true)));
+    document.getElementById("result").innerHTML = `
+      <tr><td>正解</td><td>${esc(tr.task.expected)}</td></tr>
+      <tr><td>回答</td><td>${tr.answer === null ? '<span class="muted">（回答なし）</span>' : esc(tr.answer)}</td></tr>
+      <tr><td>判定</td><td><span class="chip ${tr.pass ? "pass" : "fail"}">${tr.pass ? "成功" : "失敗"}</span> ${esc(tr.detail)}</td></tr>
+      <tr><td>終了理由</td><td>${tr.fatal ? esc(tr.fatal) : tr.finished ? "answer で終了" : "ステップ上限"}</td></tr>
+      <tr><td>無効な操作</td><td>${tr.invalidActions} 回</td></tr>
+      <tr><td>平均推論時間</td><td>${tr.meanLatency.toFixed(1)} 秒 / 手</td></tr>`;
+    document.getElementById("audit").textContent = tr.audit.length ? tr.audit.map((e) => `${e.type}  ${e.patientId || ""}  ${JSON.stringify(e.payload)}`).join("\n") : "（書き込みなし）";
+    setSpeed(SPEEDS.includes(speed) ? speed : 4);
+    select(0, false);
+  });
+});
+</script>
+</body>
+</html>

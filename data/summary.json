@@ -1,0 +1,1027 @@
+{
+ "generatedAt": "2026-10-26T12:05:34.820802",
+ "models": [
+  {
+   "id": "holo4-27b",
+   "label": "Holo4-27B (Q8_0)",
+   "note": "H Company / Qwen3.8-27B ベース・GUI 特化 Dense"
+  },
+  {
+   "id": "holo4-35b-a3b",
+   "label": "Holo4-35B-A3B (Q8_0)",
+   "note": "H Company / Qwen3.6-35B-A3B ベース・GUI 特化 MoE"
+  },
+  {
+   "id": "qwen38-27b",
+   "label": "Qwen3.8-27B (Q8_0)",
+   "note": "汎用 VLM Dense（2026-08）"
+  },
+  {
+   "id": "claude-opus-5-5",
+   "label": "Claude Opus 5.5",
+   "note": "クラウド API（参考上限）"
+  }
+ ],
+ "tasks": [
+  {
+   "id": "Q01",
+   "category": "照会",
+   "difficulty": "easy",
+   "instruction": "レセコンで患者番号 10445 の患者の保険者番号と負担割合を答えてください。",
+   "expected": "142406、3割"
+  },
+  {
+   "id": "Q02",
+   "category": "照会",
+   "difficulty": "medium",
+   "instruction": "レセコンで「髙橋 和子」さん（生年月日 1945年2月21日）の患者番号を調べて答えてください。",
+   "expected": "00010889"
+  },
+  {
+   "id": "Q03",
+   "category": "照会",
+   "difficulty": "easy",
+   "instruction": "レセコンで患者番号 10297 の 2026年10月16日 の請求点数と一部負担金を答えてください。",
+   "expected": "874点、2620円"
+  },
+  {
+   "id": "Q04",
+   "category": "照会",
+   "difficulty": "medium",
+   "instruction": "レセコンで 2026年10月分のデータチェックを実行し、「エラー」が出た患者の患者番号をすべて答えてください（警告のみの患者は含めない）。",
+   "expected": "00010704、00012221、00012665、00012739、00013072、00013220"
+  },
+  {
+   "id": "Q05",
+   "category": "照会",
+   "difficulty": "medium",
+   "instruction": "レセコンの明細書で、患者番号 10630 の 2026年10月分の請求点数（合計）と診療実日数を答えてください。",
+   "expected": "1552点、1日"
+  },
+  {
+   "id": "W01",
+   "category": "入力",
+   "difficulty": "easy",
+   "instruction": "高橋 和子さん（患者番号 11666）が来院しました。本日、内科（担当医 山田 太郎）で受付してください。",
+   "expected": "受付 00011666 内科"
+  },
+  {
+   "id": "W02",
+   "category": "入力",
+   "difficulty": "medium",
+   "instruction": "レセコンで、患者番号 14922 の病名「急性膀胱炎」の転帰を「治癒」、転帰日を 2026年10月15日 として登録してください。",
+   "expected": "急性膀胱炎 治癒 2026-10-15"
+  },
+  {
+   "id": "W03",
+   "category": "入力",
+   "difficulty": "medium",
+   "instruction": "患者番号 10926 の方が、2026年10月7日 受診分の未収金を支払いに来ました。レセコンで全額の入金を登録してください。",
+   "expected": "2026-10-07 2010円 入金"
+  },
+  {
+   "id": "W04",
+   "category": "入力",
+   "difficulty": "easy",
+   "instruction": "患者番号 12184 の原田 昭さんから転居の連絡がありました。レセコンの患者登録で住所を「神奈川県横浜市中区山下町5-12-3」に変更してください（郵便番号は 231-0023）。",
+   "expected": "神奈川県横浜市中区山下町5-12-3 / 231-0023"
+  },
+  {
+   "id": "T01",
+   "category": "転記",
+   "difficulty": "medium",
+   "instruction": "本日（2026年10月26日）、藤田 さくらさん（患者番号 14811）の診察が終わりました。電子カルテで本日の記載とオーダ（処方・検査など）を確認し、レセコンの診療行為入力で本日分を入力して登録してください。自動算定される項目は入力不要です。",
+   "expected": "1 項目＋院外処方 3 剤、376点"
+  },
+  {
+   "id": "T02",
+   "category": "転記",
+   "difficulty": "hard",
+   "instruction": "本日（2026年10月26日）、清水 幸子さん（患者番号 12591）の診察が終わりました。電子カルテで本日の記載とオーダ（処方・検査など）を確認し、レセコンの診療行為入力で本日分を入力して登録してください。自動算定される項目は入力不要です。",
+   "expected": "10 項目＋院外処方 2 剤、1167点"
+  },
+  {
+   "id": "T03",
+   "category": "転記",
+   "difficulty": "hard",
+   "instruction": "本日（2026年10月26日）、福田 裕子さん（患者番号 11925）の診察が終わりました。電子カルテで本日の記載とオーダ（処方・検査など）を確認し、レセコンの診療行為入力で本日分を入力して登録してください。自動算定される項目は入力不要です。",
+   "expected": "11 項目＋院外処方 5 剤、718点"
+  },
+  {
+   "id": "T04",
+   "category": "転記",
+   "difficulty": "hard",
+   "instruction": "本日（2026年10月26日）、伊藤 雅子さん（患者番号 11037）の診察が終わりました。電子カルテで本日の記載とオーダ（処方・検査など）を確認し、レセコンの診療行為入力で本日分を入力して登録してください。自動算定される項目は入力不要です。",
+   "expected": "12 項目＋院外処方 3 剤、1049点"
+  },
+  {
+   "id": "T05",
+   "category": "転記",
+   "difficulty": "hard",
+   "instruction": "本日（2026年10月26日）、山口 恵子さん（患者番号 11703）の診察が終わりました。電子カルテで本日の記載とオーダ（処方・検査など）を確認し、レセコンの診療行為入力で本日分を入力して登録してください。自動算定される項目は入力不要です。",
+   "expected": "20 項目＋院外処方 4 剤、1213点"
+  },
+  {
+   "id": "C01",
+   "category": "点検",
+   "difficulty": "medium",
+   "instruction": "10月分のデータチェックで、患者番号 12739 に「適応病名なし」のエラーが出ています。電子カルテの病名を確認し、レセコンに不足している病名を電子カルテと同じ開始日で登録してください。",
+   "expected": "脂質異常症（8844446）開始 2020-02-11"
+  },
+  {
+   "id": "C02",
+   "category": "点検",
+   "difficulty": "medium",
+   "instruction": "10月分のデータチェックで、患者番号 12221 に主病に関するエラーが出ています。電子カルテで主病名を確認し、レセコンの病名登録で主病を正しく設定してください。",
+   "expected": "主病 慢性閉塞性肺疾患"
+  },
+  {
+   "id": "C03",
+   "category": "点検",
+   "difficulty": "hard",
+   "instruction": "患者番号 10630 の 2026年10月2日 の診療行為を、電子カルテのその日の記載・オーダと突き合わせて点検してください。誤りや漏れがあればレセコンで修正して登録し、誤りがなければ answer で「誤りなし」と回答してください。",
+   "expected": "特定疾患療養管理料が未入力（主病が特定疾患、カルテに管理内容の記載あり）"
+  },
+  {
+   "id": "C04",
+   "category": "点検",
+   "difficulty": "hard",
+   "instruction": "患者番号 10741 の 2026年10月2日 の診療行為を、電子カルテのその日の記載・オーダと突き合わせて点検してください。誤りや漏れがあればレセコンで修正して登録し、誤りがなければ answer で「誤りなし」と回答してください。",
+   "expected": "生活習慣病管理料(II)が未入力（療養計画書あり）"
+  },
+  {
+   "id": "C05",
+   "category": "点検",
+   "difficulty": "hard",
+   "instruction": "患者番号 12887 の 2026年10月9日 の診療行為を、電子カルテのその日の記載・オーダと突き合わせて点検してください。誤りや漏れがあればレセコンで修正して登録し、誤りがなければ answer で「誤りなし」と回答してください。",
+   "expected": "実施済みの心電図（12誘導）が未入力"
+  },
+  {
+   "id": "C06",
+   "category": "点検",
+   "difficulty": "medium",
+   "instruction": "患者番号 11444 の 2026年10月14日 の診療行為を、電子カルテのその日の記載・オーダと突き合わせて点検してください。誤りや漏れがあればレセコンで修正して登録し、誤りがなければ answer で「誤りなし」と回答してください。",
+   "expected": "タケキャブ錠２０ｍｇ の日数がカルテ 28日 に対し 14日 で入力"
+  },
+  {
+   "id": "C07",
+   "category": "点検",
+   "difficulty": "medium",
+   "instruction": "患者番号 12332 の 2026年10月9日 の診療行為を、電子カルテのその日の記載・オーダと突き合わせて点検してください。誤りや漏れがあればレセコンで修正して登録し、誤りがなければ answer で「誤りなし」と回答してください。",
+   "expected": "カルテにオーダのない HbA1c が入力されている"
+  },
+  {
+   "id": "C08",
+   "category": "点検",
+   "difficulty": "medium",
+   "instruction": "患者番号 12665 の 2026年10月22日 の診療行為を、電子カルテのその日の記載・オーダと突き合わせて点検してください。誤りや漏れがあればレセコンで修正して登録し、誤りがなければ answer で「誤りなし」と回答してください。",
+   "expected": "超音波検査を実施した日に外来管理加算を算定"
+  },
+  {
+   "id": "C09",
+   "category": "点検",
+   "difficulty": "hard",
+   "instruction": "患者番号 10371 の 2026年10月2日 の診療行為を、電子カルテのその日の記載・オーダと突き合わせて点検してください。誤りや漏れがあればレセコンで修正して登録し、誤りがなければ answer で「誤りなし」と回答してください。",
+   "expected": "誤りなし（変更しない）"
+  }
+ ],
+ "agent": {
+  "claude-opus-5-5": {
+   "C01": {
+    "pass": true,
+    "steps": 24,
+    "modelCalls": 15,
+    "duration": 60.999,
+    "meanLatency": 2.4802000000000004,
+    "invalid": 0,
+    "finished": true
+   },
+   "C02": {
+    "pass": true,
+    "steps": 14,
+    "modelCalls": 11,
+    "duration": 40.182,
+    "meanLatency": 2.1657272727272727,
+    "invalid": 0,
+    "finished": true
+   },
+   "C03": {
+    "pass": true,
+    "steps": 39,
+    "modelCalls": 19,
+    "duration": 181.123,
+    "meanLatency": 7.454684210526317,
+    "invalid": 0,
+    "finished": true
+   },
+   "C04": {
+    "pass": true,
+    "steps": 20,
+    "modelCalls": 11,
+    "duration": 94.54,
+    "meanLatency": 6.156454545454546,
+    "invalid": 0,
+    "finished": true
+   },
+   "C05": {
+    "pass": true,
+    "steps": 25,
+    "modelCalls": 15,
+    "duration": 59.74,
+    "meanLatency": 2.2549333333333332,
+    "invalid": 0,
+    "finished": true
+   },
+   "C06": {
+    "pass": true,
+    "steps": 30,
+    "modelCalls": 16,
+    "duration": 60.68,
+    "meanLatency": 2.110125,
+    "invalid": 0,
+    "finished": true
+   },
+   "C07": {
+    "pass": true,
+    "steps": 21,
+    "modelCalls": 14,
+    "duration": 64.136,
+    "meanLatency": 2.965357142857143,
+    "invalid": 0,
+    "finished": true
+   },
+   "C08": {
+    "pass": true,
+    "steps": 36,
+    "modelCalls": 18,
+    "duration": 124.499,
+    "meanLatency": 5.084333333333333,
+    "invalid": 0,
+    "finished": true
+   },
+   "C09": {
+    "pass": true,
+    "steps": 35,
+    "modelCalls": 14,
+    "duration": 85.017,
+    "meanLatency": 3.435857142857143,
+    "invalid": 0,
+    "finished": true
+   },
+   "Q01": {
+    "pass": true,
+    "steps": 6,
+    "modelCalls": 6,
+    "duration": 19.749,
+    "meanLatency": 2.0081666666666664,
+    "invalid": 0,
+    "finished": true
+   },
+   "Q02": {
+    "pass": true,
+    "steps": 5,
+    "modelCalls": 4,
+    "duration": 22.84,
+    "meanLatency": 3.80725,
+    "invalid": 0,
+    "finished": true
+   },
+   "Q03": {
+    "pass": true,
+    "steps": 5,
+    "modelCalls": 4,
+    "duration": 29.176,
+    "meanLatency": 4.6930000000000005,
+    "invalid": 0,
+    "finished": true
+   },
+   "Q04": {
+    "pass": true,
+    "steps": 3,
+    "modelCalls": 3,
+    "duration": 14.488,
+    "meanLatency": 1.9706666666666666,
+    "invalid": 0,
+    "finished": true
+   },
+   "Q05": {
+    "pass": true,
+    "steps": 6,
+    "modelCalls": 6,
+    "duration": 25.882,
+    "meanLatency": 2.912833333333333,
+    "invalid": 0,
+    "finished": true
+   },
+   "T01": {
+    "pass": true,
+    "steps": 46,
+    "modelCalls": 19,
+    "duration": 95.236,
+    "meanLatency": 2.7798421052631577,
+    "invalid": 0,
+    "finished": true
+   },
+   "T02": {
+    "pass": true,
+    "steps": 45,
+    "modelCalls": 24,
+    "duration": 200.004,
+    "meanLatency": 6.44125,
+    "invalid": 0,
+    "finished": true
+   },
+   "T03": {
+    "pass": false,
+    "steps": 47,
+    "modelCalls": 21,
+    "duration": 95.527,
+    "meanLatency": 2.630095238095238,
+    "invalid": 0,
+    "finished": true
+   },
+   "T04": {
+    "pass": true,
+    "steps": 47,
+    "modelCalls": 25,
+    "duration": 111.967,
+    "meanLatency": 2.7029600000000005,
+    "invalid": 0,
+    "finished": true
+   },
+   "T05": {
+    "pass": true,
+    "steps": 49,
+    "modelCalls": 24,
+    "duration": 117.452,
+    "meanLatency": 2.8274166666666667,
+    "invalid": 0,
+    "finished": true
+   },
+   "W01": {
+    "pass": true,
+    "steps": 18,
+    "modelCalls": 13,
+    "duration": 41.679,
+    "meanLatency": 1.9029230769230772,
+    "invalid": 0,
+    "finished": true
+   },
+   "W02": {
+    "pass": true,
+    "steps": 15,
+    "modelCalls": 9,
+    "duration": 35.532,
+    "meanLatency": 2.2380000000000004,
+    "invalid": 0,
+    "finished": true
+   },
+   "W03": {
+    "pass": true,
+    "steps": 6,
+    "modelCalls": 4,
+    "duration": 34.787,
+    "meanLatency": 6.08075,
+    "invalid": 0,
+    "finished": true
+   },
+   "W04": {
+    "pass": true,
+    "steps": 12,
+    "modelCalls": 8,
+    "duration": 28.933,
+    "meanLatency": 2.0207499999999996,
+    "invalid": 0,
+    "finished": true
+   }
+  },
+  "holo4-27b": {
+   "C01": {
+    "pass": false,
+    "steps": 26,
+    "modelCalls": 26,
+    "duration": 442,
+    "meanLatency": 16.128870141730644,
+    "invalid": 0,
+    "finished": true
+   },
+   "C02": {
+    "pass": true,
+    "steps": 50,
+    "modelCalls": 50,
+    "duration": 1518.595,
+    "meanLatency": 29.492927210819982,
+    "invalid": 0,
+    "finished": false
+   },
+   "C03": {
+    "pass": false,
+    "steps": 100,
+    "modelCalls": 100,
+    "duration": 2213.519,
+    "meanLatency": 21.328520304589834,
+    "invalid": 0,
+    "finished": false
+   },
+   "C04": {
+    "pass": false,
+    "steps": 30,
+    "modelCalls": 30,
+    "duration": 568.267,
+    "meanLatency": 18.206891741033278,
+    "invalid": 0,
+    "finished": false
+   },
+   "C05": {
+    "pass": false,
+    "steps": 79,
+    "modelCalls": 79,
+    "duration": 1324.786,
+    "meanLatency": 15.903219451493433,
+    "invalid": 0,
+    "finished": false
+   },
+   "C06": {
+    "pass": false,
+    "steps": 17,
+    "modelCalls": 17,
+    "duration": 273.314,
+    "meanLatency": 15.192994750235233,
+    "invalid": 0,
+    "finished": false
+   },
+   "C07": {
+    "pass": false,
+    "steps": 100,
+    "modelCalls": 100,
+    "duration": 2171.989,
+    "meanLatency": 20.824158391259903,
+    "invalid": 0,
+    "finished": false
+   },
+   "C08": {
+    "pass": false,
+    "steps": 26,
+    "modelCalls": 26,
+    "duration": 468.089,
+    "meanLatency": 17.119623461923275,
+    "invalid": 0,
+    "finished": false
+   },
+   "C09": {
+    "pass": false,
+    "steps": 17,
+    "modelCalls": 17,
+    "duration": 314.737,
+    "meanLatency": 17.611950168176396,
+    "invalid": 0,
+    "finished": false
+   },
+   "Q01": {
+    "pass": false,
+    "steps": 4,
+    "modelCalls": 4,
+    "duration": 68.842,
+    "meanLatency": 16.336930810249996,
+    "invalid": 0,
+    "finished": true
+   },
+   "Q02": {
+    "pass": true,
+    "steps": 11,
+    "modelCalls": 11,
+    "duration": 194.982,
+    "meanLatency": 16.807102669090906,
+    "invalid": 0,
+    "finished": true
+   },
+   "Q03": {
+    "pass": false,
+    "steps": 40,
+    "modelCalls": 40,
+    "duration": 972.815,
+    "meanLatency": 23.411290236950016,
+    "invalid": 0,
+    "finished": false
+   },
+   "Q04": {
+    "pass": true,
+    "steps": 3,
+    "modelCalls": 3,
+    "duration": 60.453,
+    "meanLatency": 19.11004014966676,
+    "invalid": 0,
+    "finished": true
+   },
+   "Q05": {
+    "pass": false,
+    "steps": 6,
+    "modelCalls": 6,
+    "duration": 95.032,
+    "meanLatency": 14.974385315333377,
+    "invalid": 0,
+    "finished": true
+   },
+   "T01": {
+    "pass": false,
+    "steps": 30,
+    "modelCalls": 30,
+    "duration": 502.707,
+    "meanLatency": 15.912495196000021,
+    "invalid": 0,
+    "finished": true
+   },
+   "T02": {
+    "pass": false,
+    "steps": 37,
+    "modelCalls": 37,
+    "duration": 631.492,
+    "meanLatency": 16.17796961891896,
+    "invalid": 0,
+    "finished": false
+   },
+   "T03": {
+    "pass": false,
+    "steps": 64,
+    "modelCalls": 64,
+    "duration": 1031.319,
+    "meanLatency": 15.251591500781169,
+    "invalid": 0,
+    "finished": false
+   },
+   "T04": {
+    "pass": false,
+    "steps": 44,
+    "modelCalls": 44,
+    "duration": 910.167,
+    "meanLatency": 19.78802248193174,
+    "invalid": 0,
+    "finished": false
+   },
+   "T05": {
+    "pass": false,
+    "steps": 24,
+    "modelCalls": 24,
+    "duration": 398.914,
+    "meanLatency": 15.718727707000022,
+    "invalid": 0,
+    "finished": false
+   },
+   "W01": {
+    "pass": false,
+    "steps": 11,
+    "modelCalls": 11,
+    "duration": 161.63,
+    "meanLatency": 13.738291384727269,
+    "invalid": 0,
+    "finished": false
+   },
+   "W02": {
+    "pass": false,
+    "steps": 24,
+    "modelCalls": 24,
+    "duration": 346.592,
+    "meanLatency": 13.538872170875026,
+    "invalid": 0,
+    "finished": false
+   },
+   "W03": {
+    "pass": true,
+    "steps": 13,
+    "modelCalls": 13,
+    "duration": 188.688,
+    "meanLatency": 13.591582739538532,
+    "invalid": 0,
+    "finished": false
+   },
+   "W04": {
+    "pass": false,
+    "steps": 40,
+    "modelCalls": 40,
+    "duration": 702.955,
+    "meanLatency": 16.676691445674994,
+    "invalid": 0,
+    "finished": false
+   }
+  },
+  "holo4-35b-a3b": {
+   "C01": {
+    "pass": false,
+    "steps": 11,
+    "modelCalls": 11,
+    "duration": 53.474,
+    "meanLatency": 3.8828347218182704,
+    "invalid": 0,
+    "finished": false
+   },
+   "C02": {
+    "pass": true,
+    "steps": 100,
+    "modelCalls": 100,
+    "duration": 632.056,
+    "meanLatency": 5.4392104361999865,
+    "invalid": 0,
+    "finished": false
+   },
+   "C03": {
+    "pass": false,
+    "steps": 100,
+    "modelCalls": 100,
+    "duration": 308.409,
+    "meanLatency": 2.2001410390100067,
+    "invalid": 0,
+    "finished": false
+   },
+   "C04": {
+    "pass": false,
+    "steps": 9,
+    "modelCalls": 9,
+    "duration": 44.382,
+    "meanLatency": 4.143616761333413,
+    "invalid": 0,
+    "finished": false
+   },
+   "C05": {
+    "pass": false,
+    "steps": 100,
+    "modelCalls": 100,
+    "duration": 320.531,
+    "meanLatency": 2.31114847006001,
+    "invalid": 0,
+    "finished": false
+   },
+   "C06": {
+    "pass": false,
+    "steps": 17,
+    "modelCalls": 17,
+    "duration": 74.765,
+    "meanLatency": 3.469102807588272,
+    "invalid": 0,
+    "finished": false
+   },
+   "C07": {
+    "pass": false,
+    "steps": 76,
+    "modelCalls": 76,
+    "duration": 420.045,
+    "meanLatency": 4.657276944263134,
+    "invalid": 0,
+    "finished": false
+   },
+   "C08": {
+    "pass": false,
+    "steps": 21,
+    "modelCalls": 21,
+    "duration": 81.03,
+    "meanLatency": 2.9309729770475204,
+    "invalid": 0,
+    "finished": false
+   },
+   "C09": {
+    "pass": false,
+    "steps": 69,
+    "modelCalls": 69,
+    "duration": 231.756,
+    "meanLatency": 2.4608924212173378,
+    "invalid": 0,
+    "finished": false
+   },
+   "Q01": {
+    "pass": false,
+    "steps": 7,
+    "modelCalls": 7,
+    "duration": 38.927,
+    "meanLatency": 4.675936870571428,
+    "invalid": 0,
+    "finished": false
+   },
+   "Q02": {
+    "pass": false,
+    "steps": 40,
+    "modelCalls": 40,
+    "duration": 200.186,
+    "meanLatency": 4.09818456515,
+    "invalid": 0,
+    "finished": false
+   },
+   "Q03": {
+    "pass": false,
+    "steps": 6,
+    "modelCalls": 6,
+    "duration": 30.32,
+    "meanLatency": 4.176498368500014,
+    "invalid": 0,
+    "finished": false
+   },
+   "Q04": {
+    "pass": true,
+    "steps": 3,
+    "modelCalls": 3,
+    "duration": 18.802,
+    "meanLatency": 5.313716992666674,
+    "invalid": 0,
+    "finished": true
+   },
+   "Q05": {
+    "pass": false,
+    "steps": 15,
+    "modelCalls": 15,
+    "duration": 62.989,
+    "meanLatency": 3.2681615302,
+    "invalid": 0,
+    "finished": false
+   },
+   "T01": {
+    "pass": false,
+    "steps": 100,
+    "modelCalls": 100,
+    "duration": 567.049,
+    "meanLatency": 4.808701798560007,
+    "invalid": 0,
+    "finished": true
+   },
+   "T02": {
+    "pass": false,
+    "steps": 27,
+    "modelCalls": 27,
+    "duration": 109.202,
+    "meanLatency": 3.116847408185195,
+    "invalid": 0,
+    "finished": false
+   },
+   "T03": {
+    "pass": false,
+    "steps": 100,
+    "modelCalls": 100,
+    "duration": 577.895,
+    "meanLatency": 4.9063132900200035,
+    "invalid": 0,
+    "finished": false
+   },
+   "T04": {
+    "pass": false,
+    "steps": 33,
+    "modelCalls": 33,
+    "duration": 160.825,
+    "meanLatency": 4.035782540242456,
+    "invalid": 0,
+    "finished": false
+   },
+   "T05": {
+    "pass": false,
+    "steps": 46,
+    "modelCalls": 46,
+    "duration": 234.735,
+    "meanLatency": 4.187895707065158,
+    "invalid": 0,
+    "finished": false
+   },
+   "W01": {
+    "pass": false,
+    "steps": 15,
+    "modelCalls": 15,
+    "duration": 72.185,
+    "meanLatency": 3.872897448866667,
+    "invalid": 0,
+    "finished": false
+   },
+   "W02": {
+    "pass": false,
+    "steps": 22,
+    "modelCalls": 22,
+    "duration": 116.486,
+    "meanLatency": 4.369759707772718,
+    "invalid": 0,
+    "finished": false
+   },
+   "W03": {
+    "pass": true,
+    "steps": 12,
+    "modelCalls": 12,
+    "duration": 63.499,
+    "meanLatency": 4.456644380500006,
+    "invalid": 0,
+    "finished": true
+   },
+   "W04": {
+    "pass": false,
+    "steps": 28,
+    "modelCalls": 28,
+    "duration": 118.115,
+    "meanLatency": 3.5116092678571493,
+    "invalid": 0,
+    "finished": false
+   }
+  },
+  "qwen38-27b": {
+   "C01": {
+    "pass": false,
+    "steps": 100,
+    "modelCalls": 100,
+    "duration": 1871.465,
+    "meanLatency": 17.978229052169944,
+    "invalid": 0,
+    "finished": false
+   },
+   "C02": {
+    "pass": false,
+    "steps": 58,
+    "modelCalls": 58,
+    "duration": 1027.575,
+    "meanLatency": 16.82389687234484,
+    "invalid": 0,
+    "finished": false
+   },
+   "C03": {
+    "pass": false,
+    "steps": 100,
+    "modelCalls": 100,
+    "duration": 2251.477,
+    "meanLatency": 21.63213228840008,
+    "invalid": 0,
+    "finished": false
+   },
+   "C04": {
+    "pass": false,
+    "steps": 100,
+    "modelCalls": 100,
+    "duration": 1605.304,
+    "meanLatency": 15.191444909400323,
+    "invalid": 0,
+    "finished": false
+   },
+   "C05": {
+    "pass": false,
+    "steps": 100,
+    "modelCalls": 100,
+    "duration": 1663.308,
+    "meanLatency": 15.81470988329031,
+    "invalid": 0,
+    "finished": false
+   },
+   "C06": {
+    "pass": false,
+    "steps": 100,
+    "modelCalls": 100,
+    "duration": 1822.077,
+    "meanLatency": 17.42113441177979,
+    "invalid": 0,
+    "finished": false
+   },
+   "C07": {
+    "pass": false,
+    "steps": 12,
+    "modelCalls": 12,
+    "duration": 187.622,
+    "meanLatency": 14.85604551833309,
+    "invalid": 0,
+    "finished": false
+   },
+   "C08": {
+    "pass": false,
+    "steps": 69,
+    "modelCalls": 69,
+    "duration": 1273.252,
+    "meanLatency": 17.569605025709908,
+    "invalid": 0,
+    "finished": false
+   },
+   "C09": {
+    "pass": false,
+    "steps": 34,
+    "modelCalls": 34,
+    "duration": 567.408,
+    "meanLatency": 15.934427925970738,
+    "invalid": 0,
+    "finished": false
+   },
+   "Q01": {
+    "pass": false,
+    "steps": 40,
+    "modelCalls": 40,
+    "duration": 813.024,
+    "meanLatency": 19.42868389775,
+    "invalid": 0,
+    "finished": false
+   },
+   "Q02": {
+    "pass": true,
+    "steps": 7,
+    "modelCalls": 7,
+    "duration": 120.246,
+    "meanLatency": 16.246571878142838,
+    "invalid": 0,
+    "finished": true
+   },
+   "Q03": {
+    "pass": true,
+    "steps": 16,
+    "modelCalls": 16,
+    "duration": 355.275,
+    "meanLatency": 21.324508651187536,
+    "invalid": 0,
+    "finished": true
+   },
+   "Q04": {
+    "pass": true,
+    "steps": 3,
+    "modelCalls": 3,
+    "duration": 56.94,
+    "meanLatency": 18.057021568000007,
+    "invalid": 0,
+    "finished": true
+   },
+   "Q05": {
+    "pass": false,
+    "steps": 6,
+    "modelCalls": 6,
+    "duration": 95.354,
+    "meanLatency": 15.018538658833327,
+    "invalid": 0,
+    "finished": true
+   },
+   "T01": {
+    "pass": false,
+    "steps": 44,
+    "modelCalls": 44,
+    "duration": 843.886,
+    "meanLatency": 18.298502372386352,
+    "invalid": 0,
+    "finished": false
+   },
+   "T02": {
+    "pass": false,
+    "steps": 88,
+    "modelCalls": 88,
+    "duration": 1884.702,
+    "meanLatency": 20.539843717159073,
+    "invalid": 0,
+    "finished": false
+   },
+   "T03": {
+    "pass": false,
+    "steps": 68,
+    "modelCalls": 68,
+    "duration": 1417.351,
+    "meanLatency": 19.993152097235342,
+    "invalid": 0,
+    "finished": true
+   },
+   "T04": {
+    "pass": false,
+    "steps": 37,
+    "modelCalls": 37,
+    "duration": 670.503,
+    "meanLatency": 17.25331264745932,
+    "invalid": 0,
+    "finished": false
+   },
+   "T05": {
+    "pass": false,
+    "steps": 100,
+    "modelCalls": 100,
+    "duration": 1964.35,
+    "meanLatency": 18.809807381229977,
+    "invalid": 0,
+    "finished": false
+   },
+   "W01": {
+    "pass": true,
+    "steps": 40,
+    "modelCalls": 40,
+    "duration": 783.269,
+    "meanLatency": 18.692437120925,
+    "invalid": 0,
+    "finished": false
+   },
+   "W02": {
+    "pass": false,
+    "steps": 19,
+    "modelCalls": 19,
+    "duration": 327.222,
+    "meanLatency": 16.447257668789472,
+    "invalid": 0,
+    "finished": true
+   },
+   "W03": {
+    "pass": true,
+    "steps": 7,
+    "modelCalls": 7,
+    "duration": 109.926,
+    "meanLatency": 14.898102002714426,
+    "invalid": 0,
+    "finished": true
+   },
+   "W04": {
+    "pass": false,
+    "steps": 40,
+    "modelCalls": 40,
+    "duration": 681.832,
+    "meanLatency": 16.285685464849973,
+    "invalid": 0,
+    "finished": true
+   }
+  }
+ },
+ "perception": {}
+}
